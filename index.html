@@ -88,100 +88,83 @@ input:focus,select:focus{border-color:#78aef5;box-shadow:0 0 0 3px #78aef522}
 .legendrow{color:#b2bdcc}.legendrow strong{color:#f1f3f6}
 .chartwrap canvas{filter:drop-shadow(0 5px 12px #0005)}
 
+
+/* Présentation dédiée aux charges fixes */
+.chartwrap{grid-template-columns:minmax(130px,.8fr) minmax(0,1.2fr);align-items:start}
+.chartlegend{max-height:340px;overflow:auto;padding-right:3px}
+.legendrow{align-items:flex-start;line-height:1.35}
+.legendrow strong{margin-bottom:2px}
+@media(max-width:390px){.chartwrap{grid-template-columns:1fr}.chartwrap canvas{max-width:205px}.chartlegend{grid-template-columns:1fr;max-height:none}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
  <div class="topline"><div class="brand">Gestion financière personnelle</div><div class="brandmark">€</div></div>
- <h1>Mon Budget</h1><p>Une vue claire sur ton argent, mois après mois.</p>
+ <h1>Mon Budget</h1><p>Toutes tes charges fixes au même endroit.</p>
 </div></header>
 <main class="wrap">
- <div class="monthrow"><label for="month">TON BUDGET</label><input id="month" type="month" aria-label="Mois du budget"></div>
  <section class="hero">
-  <div class="eyebrow">Ton reste à vivre</div><div class="balance" id="remaining">0,00 €</div>
+  <div class="eyebrow">Total de tes charges fixes mensuelles</div>
+  <div class="balance" id="fixedGrandTotal">0,00 €</div>
   <div class="stats">
-   <div class="stat"><small>REVENUS DU MOIS</small><strong id="salaryStat">0,00 €</strong></div>
-   <div class="stat"><small>DÉPENSES TOTALES</small><strong id="chargesStat">0,00 €</strong></div>
-  </div>
-  <div class="progresshead"><span>Budget utilisé</span><span id="progressText">0 %</span></div><div class="progress"><span id="progress"></span></div>
- </section>
- <nav class="tabs" aria-label="Navigation">
-  <button class="tab active" data-tab="overview">⌂ Aperçu</button><button class="tab" data-tab="recurring">↻ Charges fixes</button><button class="tab" data-tab="daily">＋ Dépenses</button>
- </nav>
- <section id="overview" class="panel">
-  <div class="card">
-   <div class="cardhead"><div><h2>Mes revenus</h2><p class="hint">Renseigne ton salaire net pour ce mois.</p></div><div class="iconbubble">€</div></div>
-   <div class="field"><label for="salary">SALAIRE NET MENSUEL (€)</label><input id="salary" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 2 000"></div>
-  </div>
-  <div class="card">
-   <div class="cardhead"><div><h2>Où va mon argent ?</h2><p class="hint">Le détail de tes sorties du mois.</p></div><div class="iconbubble">▤</div></div>
-   <div class="summaryline"><span>Abonnements et charges fixes</span><strong id="fixedTotal">0,00 €</strong></div>
-   <div class="summaryline"><span>Dépenses du quotidien</span><strong id="dailyTotal">0,00 €</strong></div>
-   <div class="summaryline"><strong>Total des dépenses</strong><strong id="allTotal">0,00 €</strong></div>
-  </div>
-  <div class="card">
-   <div class="cardhead"><div><h2>Répartition des dépenses</h2><p class="hint">Le camembert se met à jour avec le mois sélectionné.</p></div><div class="iconbubble">◔</div></div>
-   <div class="chartwrap"><canvas id="expenseChart" role="img" aria-label="Camembert de répartition des dépenses"></canvas><div id="chartLegend" class="chartlegend"></div></div>
-   <p id="chartEmpty" class="hint chartempty">Ajoute des charges ou des dépenses pour afficher la répartition.</p>
-  </div>
-  <div class="card">
-   <div class="cardhead"><div><h2>Sauvegarde de mes données</h2><p class="hint">Garde une copie avant de changer de navigateur ou de téléphone.</p></div><div class="iconbubble">⇧</div></div>
-   <div class="backupactions"><button class="secondary" id="exportData">Exporter ma sauvegarde</button><button class="secondary" id="importData">Importer une sauvegarde</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
-   <p class="hint" style="line-height:1.5">Tes données restent enregistrées sur cet appareil. L'import remplace les données actuellement enregistrées dans cette application.</p>
-  </div>
-  <div class="card installcard" id="installCard" hidden>
-   <div class="cardhead"><div><h2>Installer Mon Budget</h2><p class="hint">Ajoute l'application à ton écran d'accueil Android.</p></div><div class="iconbubble">＋</div></div>
-   <button class="primary" id="installApp">Installer l'application</button>
-  </div>
-  <div class="card">
-   <div class="cardhead"><div><h2>Petit rappel</h2><p class="hint">Pense à actualiser tes chiffres au début du mois.</p></div><div class="iconbubble">✦</div></div>
-   <p class="hint" style="font-size:13px;line-height:1.6;margin:0">Ajoute tes charges fixes une seule fois, puis note tes dépenses au fil du mois. Ton reste à vivre se met à jour automatiquement.</p>
+   <div class="stat"><small>NOMBRE DE CHARGES</small><strong id="fixedCountStat">0</strong></div>
+   <div class="stat"><small>CHARGE LA PLUS ÉLEVÉE</small><strong id="highestCharge">0,00 €</strong></div>
   </div>
  </section>
- <section id="recurring" class="panel hidden">
-  <div class="card">
-   <div class="cardhead"><div><h2>Ajouter une charge fixe</h2><p class="hint">Abonnements, assurances, crédits, logement…</p></div><div class="iconbubble">↻</div></div>
-   <div class="field"><label for="fixedName">NOM DE LA CHARGE</label><input id="fixedName" placeholder="Ex. Netflix, assurance auto"></div>
-   <div class="field"><label for="fixedAmount">MONTANT MENSUEL (€)</label><input id="fixedAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 19,99"></div>
-   <div class="field"><label for="fixedCategory">CATÉGORIE</label><select id="fixedCategory"><option>Abonnement</option><option>Logement</option><option>Énergie</option><option>Assurance</option><option>Téléphone / Internet</option><option>Crédit</option><option>Transport</option><option>Autre</option></select></div>
-   <button class="primary" id="addFixed">＋ Ajouter cette charge</button>
-  </div>
-  <div class="card"><div class="cardhead"><h2>Mes charges fixes</h2><span class="pill" id="fixedCount">0 charge</span></div><div id="fixedList"></div></div>
+ <section class="card">
+  <div class="cardhead"><div><h2>Répartition de mes charges</h2><p class="hint">Chaque charge possède sa propre part dans le camembert.</p></div><div class="iconbubble">◔</div></div>
+  <div class="chartwrap"><canvas id="expenseChart" role="img" aria-label="Camembert détaillé de chaque charge fixe"></canvas><div id="chartLegend" class="chartlegend"></div></div>
+  <p id="chartEmpty" class="hint chartempty">Ajoute tes charges fixes pour voir leur répartition.</p>
  </section>
- <section id="daily" class="panel hidden">
-  <div class="card">
-   <div class="cardhead"><div><h2>Ajouter une dépense</h2><p class="hint">Courses, essence, sorties et achats ponctuels.</p></div><div class="iconbubble">＋</div></div>
-   <div class="field"><label for="dailyName">LIBELLÉ</label><input id="dailyName" placeholder="Ex. Courses, essence, restaurant"></div>
-   <div class="field"><label for="dailyAmount">MONTANT (€)</label><input id="dailyAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 45,50"></div>
-   <div class="field"><label for="dailyCategory">CATÉGORIE</label><select id="dailyCategory"><option>Courses</option><option>Essence / Transport</option><option>Restaurant / Sorties</option><option>Maison</option><option>Santé</option><option>Loisirs</option><option>Autre</option></select></div>
-   <button class="primary" id="addDaily">＋ Enregistrer la dépense</button>
-  </div>
-  <div class="card"><div class="cardhead"><h2>Mes dépenses du mois</h2><span class="pill" id="dailyCount">0 dépense</span></div><div id="dailyList"></div></div>
+ <section class="card">
+  <div class="cardhead"><div><h2>Ajouter une charge fixe</h2><p class="hint">Loyer, crédit, assurances, abonnements, énergie…</p></div><div class="iconbubble">＋</div></div>
+  <div class="field"><label for="fixedName">NOM DE LA CHARGE</label><input id="fixedName" placeholder="Ex. Loyer, assurance auto, Netflix"></div>
+  <div class="field"><label for="fixedAmount">MONTANT MENSUEL (€)</label><input id="fixedAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ex. 19,99"></div>
+  <div class="field"><label for="fixedCategory">CATÉGORIE</label><select id="fixedCategory"><option>Abonnement</option><option>Logement</option><option>Énergie</option><option>Assurance</option><option>Téléphone / Internet</option><option>Crédit</option><option>Transport</option><option>Autre</option></select></div>
+  <button class="primary" id="addFixed">＋ Ajouter cette charge</button>
+ </section>
+ <section class="card">
+  <div class="cardhead"><h2>Mes charges fixes</h2><span class="pill" id="fixedCount">0 charge</span></div>
+  <div id="fixedList"></div>
+ </section>
+ <section class="card">
+  <div class="cardhead"><div><h2>Sauvegarde de mes données</h2><p class="hint">Exporte une copie ou restaure une sauvegarde existante.</p></div><div class="iconbubble">⇧</div></div>
+  <div class="backupactions"><button class="secondary" id="exportData">Exporter ma sauvegarde</button><button class="secondary" id="importData">Importer une sauvegarde</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
+  <p class="hint" style="line-height:1.5">Les anciennes données de revenus et de dépenses quotidiennes sont conservées dans la sauvegarde, même si elles ne sont plus affichées ici.</p>
+ </section>
+ <section class="card installcard" id="installCard" hidden>
+  <div class="cardhead"><div><h2>Installer Mon Budget</h2><p class="hint">Ajoute l'application à ton écran d'accueil Android.</p></div><div class="iconbubble">＋</div></div>
+  <button class="primary" id="installApp">Installer l'application</button>
  </section>
  <div class="footer">🔒 Tes données restent dans le stockage local de ce navigateur sur cet appareil.<br>Cette application ne se connecte pas à ta banque.</div>
 </main>
 <script>
 (()=> {
 const $=id=>document.getElementById(id), euro=n=>Number(n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
-const now=new Date(),current=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;$('month').value=current;
-let store={months:{},fixed:[]};try{store=JSON.parse(localStorage.getItem('monBudgetData')||'null')||store}catch(e){}
-function save(){try{localStorage.setItem('monBudgetData',JSON.stringify(store))}catch(e){alert('Le stockage de cet appareil est indisponible. Pense à exporter ou noter tes données.');}}
-function md(){let k=$('month').value||current;if(!store.months[k])store.months[k]={salary:'',daily:[]};return store.months[k]}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function totals(){let d=md(),fixed=store.fixed.reduce((s,x)=>s+x.amount,0),daily=d.daily.reduce((s,x)=>s+x.amount,0),salary=Number(d.salary)||0;return{fixed,daily,salary,all:fixed+daily,remaining:salary-fixed-daily}}
-function icon(cat){return ({'Abonnement':'▣','Logement':'⌂','Énergie':'ϟ','Assurance':'✓','Téléphone / Internet':'▤','Crédit':'€','Transport':'↗','Courses':'▤','Essence / Transport':'↗','Restaurant / Sorties':'☕','Maison':'⌂','Santé':'＋','Loisirs':'✦'})[cat]||'•'}
-function renderList(target,items,kind){let el=$(target);if(!items.length){el.innerHTML='<div class="empty"><div class="emptyicon">✧</div>Aucune ligne pour le moment.<br>Ajoute ton premier élément ci-dessus.</div>';return}
-el.innerHTML=items.map(x=>`<div class="item"><div class="itemicon">${icon(x.category)}</div><div class="itemmain"><div class="itemname">${esc(x.name)}</div><div class="sub">${esc(x.category||'')}</div></div><div class="itemright"><div class="amount">${euro(x.amount)}</div><div class="actions"><button class="mini" data-edit="${kind}" data-id="${x.id}">Modifier</button><button class="mini danger" data-delete="${kind}" data-id="${x.id}">Supprimer</button></div></div></div>`).join('')}
-function chartParts(){let d=md(),subs=store.fixed.filter(x=>x.category==='Abonnement').reduce((s,x)=>s+Number(x.amount||0),0),otherFixed=store.fixed.filter(x=>x.category!=='Abonnement').reduce((s,x)=>s+Number(x.amount||0),0),daily=d.daily.reduce((s,x)=>s+Number(x.amount||0),0);return [{label:'Abonnements',value:subs,color:'#3478dc'},{label:'Autres charges fixes',value:otherFixed,color:'#70a4ef'},{label:'Dépenses quotidiennes',value:daily,color:'#173f7d'}].filter(x=>x.value>0)}
-function drawChart(){let canvas=$('expenseChart'),ctx=canvas.getContext('2d'),parts=chartParts(),total=parts.reduce((s,x)=>s+x.value,0),legend=$('chartLegend');let w=canvas.clientWidth||210,size=Math.max(160,Math.round(w*devicePixelRatio));canvas.width=size;canvas.height=size;ctx.clearRect(0,0,size,size);legend.innerHTML='';$('chartEmpty').style.display=total?'none':'block';if(!total){ctx.beginPath();ctx.arc(size/2,size/2,size*.39,0,Math.PI*2);ctx.fillStyle='#e8eef8';ctx.fill();ctx.beginPath();ctx.arc(size/2,size/2,size*.25,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();return}let start=-Math.PI/2;parts.forEach(p=>{let end=start+p.value/total*Math.PI*2;ctx.beginPath();ctx.moveTo(size/2,size/2);ctx.arc(size/2,size/2,size*.42,start,end);ctx.closePath();ctx.fillStyle=p.color;ctx.fill();start=end;let row=document.createElement('div');row.className='legendrow';row.innerHTML='<span class="legenddot" style="background:'+p.color+'"></span><span><strong>'+euro(p.value)+'</strong>'+p.label+'</span>';legend.appendChild(row)});ctx.beginPath();ctx.arc(size/2,size/2,size*.255,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f1f3f6';ctx.font='700 '+Math.round(size*.09)+'px system-ui';ctx.fillText(euro(total).replace(/\s/g,''),size/2,size/2)}
-function render(){let d=md(),t=totals();$('salary').value=d.salary;$('remaining').textContent=euro(t.remaining);$('remaining').classList.toggle('negative',t.remaining<0);$('salaryStat').textContent=euro(t.salary);$('chargesStat').textContent=euro(t.all);$('fixedTotal').textContent=euro(t.fixed);$('dailyTotal').textContent=euro(t.daily);$('allTotal').textContent=euro(t.all);let pct=t.salary>0?Math.min(100,t.all/t.salary*100):0;$('progress').style.width=pct+'%';$('progressText').textContent=(t.salary>0?Math.round(t.all/t.salary*100):0)+' %';$('fixedCount').textContent=store.fixed.length+' charge'+(store.fixed.length>1?'s':'');$('dailyCount').textContent=d.daily.length+' dépense'+(d.daily.length>1?'s':'');renderList('fixedList',store.fixed,'fixed');renderList('dailyList',d.daily,'daily');drawChart()}
-$('salary').addEventListener('input',()=>{md().salary=$('salary').value;save();render()});$('month').addEventListener('change',render);
-$('addFixed').onclick=()=>{let name=$('fixedName').value.trim(),amount=Number($('fixedAmount').value);if(!name||!Number.isFinite(amount)||amount<=0)return alert('Indique un nom et un montant valide.');store.fixed.push({id:Date.now()+Math.random(),name,amount,category:$('fixedCategory').value});$('fixedName').value='';$('fixedAmount').value='';save();render()};
-$('addDaily').onclick=()=>{let name=$('dailyName').value.trim(),amount=Number($('dailyAmount').value);if(!name||!Number.isFinite(amount)||amount<=0)return alert('Indique un libellé et un montant valide.');md().daily.push({id:Date.now()+Math.random(),name,amount,category:$('dailyCategory').value});$('dailyName').value='';$('dailyAmount').value='';save();render()};
-document.addEventListener('click',e=>{let del=e.target.closest('[data-delete]');if(del){let kind=del.dataset.delete,id=Number(del.dataset.id);if(!confirm('Supprimer cette ligne ?'))return;if(kind==='fixed')store.fixed=store.fixed.filter(x=>x.id!==id);else md().daily=md().daily.filter(x=>x.id!==id);save();render();return}let edit=e.target.closest('[data-edit]');if(edit){let kind=edit.dataset.edit,id=Number(edit.dataset.id),arr=kind==='fixed'?store.fixed:md().daily,x=arr.find(x=>x.id===id);if(!x)return;let n=prompt('Nom',x.name);if(n===null)return;let a=prompt('Montant en euros',x.amount);if(a===null)return;let amount=Number(a.replace(',','.'));if(!n.trim()||!Number.isFinite(amount)||amount<=0)return alert('Valeurs invalides.');x.name=n.trim();x.amount=amount;save();render()}});
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab))});
-$('exportData').onclick=()=>{let blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mon-budget-sauvegarde-'+($('month').value||current)+'.json';a.click();URL.revokeObjectURL(url)};
-$('importData').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{let file=e.target.files[0];if(!file)return;try{let imported=JSON.parse(await file.text());if(!imported||typeof imported!=='object'||!imported.months||!Array.isArray(imported.fixed))throw new Error('format');if(!confirm('Importer cette sauvegarde ? Les données actuellement enregistrées seront remplacées.'))return;store=imported;save();render();alert('Sauvegarde importée.')}catch(err){alert('Fichier de sauvegarde invalide.')}finally{e.target.value=''}};
+let store={months:{},fixed:[]};
+try{store=JSON.parse(localStorage.getItem('monBudgetData')||'null')||store}catch(e){}
+if(!Array.isArray(store.fixed))store.fixed=[];
+if(!store.months || typeof store.months!=='object')store.months={};
+function save(){try{localStorage.setItem('monBudgetData',JSON.stringify(store))}catch(e){alert('Le stockage de cet appareil est indisponible. Pense à exporter tes données.')}}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function icon(cat){return ({'Abonnement':'▣','Logement':'⌂','Énergie':'ϟ','Assurance':'✓','Téléphone / Internet':'▤','Crédit':'€','Transport':'↗'})[cat]||'•'}
+const palette=['#4d91ee','#8b72e8','#35b8a0','#e6a34b','#e36f83','#58b6d8','#9cba58','#d18bd0','#6d83a8','#c58b63','#72a9a0','#b5a15d'];
+function colorFor(i){return palette[i%palette.length]}
+function renderList(){const el=$('fixedList');if(!store.fixed.length){el.innerHTML='<div class="empty"><div class="emptyicon">✧</div>Aucune charge fixe pour le moment.<br>Ajoute ta première charge ci-dessus.</div>';return}
+ const ordered=[...store.fixed].sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr'));
+ el.innerHTML=ordered.map(x=>{const idx=store.fixed.findIndex(y=>String(y.id)===String(x.id));return `<div class="item"><div class="itemicon">${icon(x.category)}</div><div class="itemmain"><div class="itemname">${esc(x.name)}</div><div class="sub">${esc(x.category||'Autre')}</div></div><div class="itemright"><div class="amount">${euro(x.amount)}</div><div class="actions"><button class="mini" data-edit="${esc(x.id)}">Modifier</button><button class="mini danger" data-delete="${esc(x.id)}">Supprimer</button></div></div></div>`}).join('')}
+function drawChart(){const canvas=$('expenseChart'),ctx=canvas.getContext('2d'),legend=$('chartLegend');const parts=store.fixed.map((x,i)=>({name:String(x.name||'Charge'),category:String(x.category||'Autre'),value:Math.max(0,Number(x.amount)||0),color:colorFor(i)})).filter(x=>x.value>0);const total=parts.reduce((s,x)=>s+x.value,0);const w=canvas.clientWidth||210,size=Math.max(180,Math.round(w*(window.devicePixelRatio||1)));canvas.width=size;canvas.height=size;ctx.clearRect(0,0,size,size);legend.innerHTML='';$('chartEmpty').style.display=total?'none':'block';
+ if(!total){ctx.beginPath();ctx.arc(size/2,size/2,size*.40,0,Math.PI*2);ctx.fillStyle='#303946';ctx.fill();ctx.beginPath();ctx.arc(size/2,size/2,size*.255,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();return}
+ let angle=-Math.PI/2;parts.forEach(p=>{const end=angle+(p.value/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(size/2,size/2);ctx.arc(size/2,size/2,size*.43,angle,end);ctx.closePath();ctx.fillStyle=p.color;ctx.fill();angle=end;
+ const row=document.createElement('div');row.className='legendrow';const dot=document.createElement('span');dot.className='legenddot';dot.style.background=p.color;const info=document.createElement('span');const strong=document.createElement('strong');strong.textContent=euro(p.value)+' · '+(total?Math.round(p.value/total*100):0)+' %';const label=document.createElement('span');label.textContent=p.name+' — '+p.category;info.append(strong,label);row.append(dot,info);legend.appendChild(row);
+ });
+ ctx.beginPath();ctx.arc(size/2,size/2,size*.255,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f1f3f6';ctx.font='700 '+Math.round(size*.085)+'px system-ui';ctx.fillText(euro(total).replace(/\s/g,''),size/2,size/2);
+}
+function render(){const total=store.fixed.reduce((s,x)=>s+(Number(x.amount)||0),0);const count=store.fixed.length;const highest=store.fixed.reduce((m,x)=>Math.max(m,Number(x.amount)||0),0);$('fixedGrandTotal').textContent=euro(total);$('fixedCountStat').textContent=String(count);$('highestCharge').textContent=euro(highest);$('fixedCount').textContent=count+' charge'+(count>1?'s':'');renderList();drawChart()}
+$('addFixed').onclick=()=>{const name=$('fixedName').value.trim(),amount=Number($('fixedAmount').value);if(!name||!Number.isFinite(amount)||amount<=0)return alert('Indique un nom et un montant valide.');store.fixed.push({id:Date.now()+Math.random(),name,amount,category:$('fixedCategory').value});$('fixedName').value='';$('fixedAmount').value='';save();render()};
+document.addEventListener('click',e=>{const del=e.target.closest('[data-delete]');if(del){const id=del.dataset.delete;if(!confirm('Supprimer cette charge fixe ?'))return;store.fixed=store.fixed.filter(x=>String(x.id)!==String(id));save();render();return}const edit=e.target.closest('[data-edit]');if(edit){const x=store.fixed.find(x=>String(x.id)===String(edit.dataset.edit));if(!x)return;const n=prompt('Nom de la charge',x.name);if(n===null)return;const a=prompt('Montant mensuel en euros',x.amount);if(a===null)return;const amount=Number(a.replace(',','.'));if(!n.trim()||!Number.isFinite(amount)||amount<=0)return alert('Valeurs invalides.');x.name=n.trim();x.amount=amount;save();render()}});
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mon-budget-sauvegarde-charges-fixes.json';a.click();URL.revokeObjectURL(url)};
+$('importData').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const imported=JSON.parse(await file.text());if(!imported||typeof imported!=='object'||!imported.months||!Array.isArray(imported.fixed))throw new Error('format');if(!confirm('Importer cette sauvegarde ? Les données actuellement enregistrées seront remplacées.'))return;store=imported;save();render();alert('Sauvegarde importée.')}catch(err){alert('Fichier de sauvegarde invalide.')}finally{e.target.value=''}};
 let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installCard').hidden=false});$('installApp').onclick=async()=>{if(!installPrompt){alert('Sur Android, ouvre le menu ⋮ de Chrome puis choisis « Installer l’application » ou « Ajouter à l’écran d’accueil ».');return}installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installCard').hidden=true};
 if('serviceWorker' in navigator && location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 render();

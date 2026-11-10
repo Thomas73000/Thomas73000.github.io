@@ -1,7 +1,7 @@
 {
   "name": "Mon Budget",
   "short_name": "Mon Budget",
-  "description": "Gestion personnelle de ton budget mensuel",
+  "description": "Suivi et répartition détaillée des charges fixes mensuelles",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

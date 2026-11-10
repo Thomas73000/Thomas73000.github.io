@@ -1,13 +1,13 @@
-MON BUDGET — PACK PWA ANDROID
+MON BUDGET — VERSION CHARGES FIXES (THÈME NOIR)
 
-Contenu : index.html, manifest.webmanifest, sw.js et icônes Android 192/512 px.
+Contenu du pack :
+- index.html : application de gestion des charges fixes
+- manifest.webmanifest : configuration PWA
+- sw.js : fonctionnement hors connexion et mise à jour du cache
+- icons/ : icônes Android 192 px et 512 px
 
-INSTALLATION :
-1. Héberge le contenu de ce dossier sur un hébergement HTTPS (GitHub Pages, Netlify ou autre). Une PWA ne peut pas être installée directement depuis un fichier ZIP/local HTML.
-2. Ouvre l'adresse HTTPS dans Chrome sur Android.
-3. Utilise « Installer l'application » si le bouton apparaît, sinon menu ⋮ > Installer l'application / Ajouter à l'écran d'accueil.
+Installation : héberge le contenu de ce dossier sur un site en HTTPS, puis ouvre son adresse dans Chrome sur Android et choisis « Installer l’application » ou « Ajouter à l’écran d’accueil ».
 
-IMPORTANT — DONNÉES :
-- La clé de stockage local reste « monBudgetData » pour préserver les données si tu remplaces l'ancienne version sur exactement la même origine/navigateur.
-- Un changement d'origine (par exemple passage d'un fichier local à un site HTTPS) ne transfère pas automatiquement le stockage. Avant de changer, ouvre l'ancienne application, va dans Aperçu > Exporter ma sauvegarde. Sur la nouvelle, utilise Importer une sauvegarde.
-- Le navigateur doit être le même pour retrouver les données stockées localement. Ne vide pas les données du site/navigateur avant d'avoir exporté une sauvegarde.
+Données : l’application conserve la clé de stockage local monBudgetData. Les anciennes données de revenus et dépenses quotidiennes ne sont pas supprimées : elles restent dans les données locales et dans les sauvegardes exportées, mais ne sont plus affichées dans cette version centrée sur les charges fixes.
+
+Pense à exporter régulièrement une sauvegarde JSON.
