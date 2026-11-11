@@ -11,3 +11,6 @@ Installation : héberge le contenu de ce dossier sur un site en HTTPS, puis ouvr
 Données : l’application conserve la clé de stockage local monBudgetData. Les anciennes données de revenus et dépenses quotidiennes ne sont pas supprimées : elles restent dans les données locales et dans les sauvegardes exportées, mais ne sont plus affichées dans cette version centrée sur les charges fixes.
 
 Pense à exporter régulièrement une sauvegarde JSON.
+
+
+Mise à jour : camembert interactif. Clique sur une part pour afficher le nom, le montant et le pourcentage au centre du graphique. La légende détaillée permanente a été supprimée.

@@ -51,7 +51,7 @@ input:focus,select:focus{border-color:#6b9ce8;box-shadow:0 0 0 3px #2563c713}
 .empty{padding:25px 12px;text-align:center;color:var(--muted);font-size:13px}.emptyicon{font-size:27px;margin-bottom:5px}
 .footer{text-align:center;color:#8a968f;font-size:11px;line-height:1.55;padding:16px 8px 0}
 .pill{display:inline-flex;align-items:center;gap:5px;background:#e8f0ff;color:#174b9b;border-radius:99px;padding:5px 9px;font-size:10px;font-weight:800}
-.chartwrap{display:grid;grid-template-columns:minmax(145px, .9fr) minmax(0,1.1fr);align-items:center;gap:14px}.chartwrap canvas{width:100%;max-width:230px;aspect-ratio:1;display:block;margin:auto}.chartlegend{display:grid;gap:10px}.legendrow{display:flex;align-items:center;gap:8px;font-size:12px;color:#52627a}.legenddot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}.legendrow strong{display:block;color:var(--ink);font-size:13px}.chartempty{margin:10px 0 0}.backupactions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.backupactions .secondary{min-height:44px}.installcard[hidden]{display:none}@media(max-width:390px){.chartwrap{grid-template-columns:1fr}.chartwrap canvas{max-width:190px}.chartlegend{grid-template-columns:1fr 1fr;gap:8px}}
+.chartwrap{display:flex;justify-content:center;align-items:center;width:100%}.chartwrap canvas{width:100%;max-width:310px;aspect-ratio:1;display:block;margin:auto;cursor:pointer;touch-action:manipulation;outline:none}.chartwrap canvas:focus-visible{border-radius:50%;outline:2px solid #78aef5;outline-offset:5px}.chartempty{margin:10px 0 0}.backupactions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.backupactions .secondary{min-height:44px}.installcard[hidden]{display:none}@media(max-width:390px){.chartwrap canvas{max-width:270px}}
 @media(min-width:600px){.top{padding-top:32px}.wrap{padding-left:22px;padding-right:22px}.hero{padding:24px}.card{padding:21px}.tabs{gap:10px}.tab{font-size:13px}}
 
 /* Thème noir élégant */
@@ -85,16 +85,13 @@ input:focus,select:focus{border-color:#78aef5;box-shadow:0 0 0 3px #78aef522}
 .mini.danger{color:#ffaaa3;background:#482a2b}
 .empty{color:#9aa3b2}.footer{color:#858f9e}
 .pill{background:#293b53;color:#b5d3ff}
-.legendrow{color:#b2bdcc}.legendrow strong{color:#f1f3f6}
 .chartwrap canvas{filter:drop-shadow(0 5px 12px #0005)}
 
 
-/* Présentation dédiée aux charges fixes */
-.chartwrap{grid-template-columns:minmax(130px,.8fr) minmax(0,1.2fr);align-items:start}
-.chartlegend{max-height:340px;overflow:auto;padding-right:3px}
-.legendrow{align-items:flex-start;line-height:1.35}
-.legendrow strong{margin-bottom:2px}
-@media(max-width:390px){.chartwrap{grid-template-columns:1fr}.chartwrap canvas{max-width:205px}.chartlegend{grid-template-columns:1fr;max-height:none}}
+/* Camembert interactif sans légende permanente */
+.chartwrap{display:flex;justify-content:center;align-items:center}
+.chartwrap canvas{max-width:310px}
+@media(max-width:390px){.chartwrap canvas{max-width:270px}}
 </style>
 </head>
 <body>
@@ -112,8 +109,8 @@ input:focus,select:focus{border-color:#78aef5;box-shadow:0 0 0 3px #78aef522}
   </div>
  </section>
  <section class="card">
-  <div class="cardhead"><div><h2>Répartition de mes charges</h2><p class="hint">Chaque charge possède sa propre part dans le camembert.</p></div><div class="iconbubble">◔</div></div>
-  <div class="chartwrap"><canvas id="expenseChart" role="img" aria-label="Camembert détaillé de chaque charge fixe"></canvas><div id="chartLegend" class="chartlegend"></div></div>
+  <div class="cardhead"><div><h2>Répartition de mes charges</h2><p class="hint">Clique sur une part du camembert pour afficher la charge correspondante.</p></div><div class="iconbubble">◔</div></div>
+  <div class="chartwrap"><canvas id="expenseChart" role="button" tabindex="0" aria-label="Camembert interactif des charges fixes. Clique sur une part pour afficher son détail."></canvas></div>
   <p id="chartEmpty" class="hint chartempty">Ajoute tes charges fixes pour voir leur répartition.</p>
  </section>
  <section class="card">
@@ -153,13 +150,89 @@ function colorFor(i){return palette[i%palette.length]}
 function renderList(){const el=$('fixedList');if(!store.fixed.length){el.innerHTML='<div class="empty"><div class="emptyicon">✧</div>Aucune charge fixe pour le moment.<br>Ajoute ta première charge ci-dessus.</div>';return}
  const ordered=[...store.fixed].sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr'));
  el.innerHTML=ordered.map(x=>{const idx=store.fixed.findIndex(y=>String(y.id)===String(x.id));return `<div class="item"><div class="itemicon">${icon(x.category)}</div><div class="itemmain"><div class="itemname">${esc(x.name)}</div><div class="sub">${esc(x.category||'Autre')}</div></div><div class="itemright"><div class="amount">${euro(x.amount)}</div><div class="actions"><button class="mini" data-edit="${esc(x.id)}">Modifier</button><button class="mini danger" data-delete="${esc(x.id)}">Supprimer</button></div></div></div>`}).join('')}
-function drawChart(){const canvas=$('expenseChart'),ctx=canvas.getContext('2d'),legend=$('chartLegend');const parts=store.fixed.map((x,i)=>({name:String(x.name||'Charge'),category:String(x.category||'Autre'),value:Math.max(0,Number(x.amount)||0),color:colorFor(i)})).filter(x=>x.value>0);const total=parts.reduce((s,x)=>s+x.value,0);const w=canvas.clientWidth||210,size=Math.max(180,Math.round(w*(window.devicePixelRatio||1)));canvas.width=size;canvas.height=size;ctx.clearRect(0,0,size,size);legend.innerHTML='';$('chartEmpty').style.display=total?'none':'block';
- if(!total){ctx.beginPath();ctx.arc(size/2,size/2,size*.40,0,Math.PI*2);ctx.fillStyle='#303946';ctx.fill();ctx.beginPath();ctx.arc(size/2,size/2,size*.255,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();return}
- let angle=-Math.PI/2;parts.forEach(p=>{const end=angle+(p.value/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(size/2,size/2);ctx.arc(size/2,size/2,size*.43,angle,end);ctx.closePath();ctx.fillStyle=p.color;ctx.fill();angle=end;
- const row=document.createElement('div');row.className='legendrow';const dot=document.createElement('span');dot.className='legenddot';dot.style.background=p.color;const info=document.createElement('span');const strong=document.createElement('strong');strong.textContent=euro(p.value)+' · '+(total?Math.round(p.value/total*100):0)+' %';const label=document.createElement('span');label.textContent=p.name+' — '+p.category;info.append(strong,label);row.append(dot,info);legend.appendChild(row);
- });
- ctx.beginPath();ctx.arc(size/2,size/2,size*.255,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f1f3f6';ctx.font='700 '+Math.round(size*.085)+'px system-ui';ctx.fillText(euro(total).replace(/\s/g,''),size/2,size/2);
+let chartHits=[];
+let selectedChargeId=null;
+function fitCanvasText(ctx,text,maxWidth,baseSize,minSize=7){
+ let fs=baseSize;
+ ctx.font='700 '+fs+'px system-ui';
+ while(fs>minSize && ctx.measureText(text).width>maxWidth){fs-=.5;ctx.font='700 '+fs+'px system-ui'}
+ if(ctx.measureText(text).width>maxWidth){let short=String(text);while(short.length>3&&ctx.measureText(short+'…').width>maxWidth)short=short.slice(0,-1);text=short+'…'}
+ return {text,font:ctx.font};
 }
+function drawChart(){
+ const canvas=$('expenseChart'),ctx=canvas.getContext('2d');
+ const parts=store.fixed.map((x,i)=>({id:String(x.id),name:String(x.name||'Charge'),category:String(x.category||'Autre'),value:Math.max(0,Number(x.amount)||0),color:colorFor(i)})).filter(x=>x.value>0);
+ const total=parts.reduce((s,x)=>s+x.value,0);
+ const w=canvas.clientWidth||270,size=Math.max(180,Math.round(w*(window.devicePixelRatio||1)));
+ canvas.width=size;canvas.height=size;ctx.clearRect(0,0,size,size);
+ $('chartEmpty').style.display=total?'none':'block';
+ chartHits=[];
+ if(!parts.some(p=>p.id===selectedChargeId))selectedChargeId=null;
+ const cx=size/2,cy=size/2,outer=size*.43,inner=size*.255;
+ if(!total){
+  ctx.beginPath();ctx.arc(cx,cy,outer,0,Math.PI*2);ctx.fillStyle='#303946';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,inner,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#9aa3b2';ctx.font='700 '+Math.round(size*.052)+'px system-ui';ctx.fillText('Aucune charge',cx,cy);
+  return;
+ }
+ let angle=-Math.PI/2;
+ parts.forEach(p=>{
+  const span=(p.value/total)*Math.PI*2;
+  const end=angle+span;
+  chartHits.push({id:p.id,from:angle+Math.PI/2,to:end+Math.PI/2,part:p});
+  const selected=p.id===selectedChargeId;
+  const mid=angle+span/2,offset=selected?size*.025:0;
+  const ox=Math.cos(mid)*offset,oy=Math.sin(mid)*offset;
+  const pad=Math.min(.012,span*.12);
+  ctx.save();ctx.translate(ox,oy);
+  if(selected){ctx.shadowColor=p.color+'88';ctx.shadowBlur=size*.045}
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,outer,angle+pad,end-pad);ctx.closePath();ctx.fillStyle=p.color;ctx.fill();
+  ctx.shadowBlur=0;ctx.lineWidth=Math.max(1,size*.006);ctx.strokeStyle='#1a1e25';ctx.stroke();
+  ctx.restore();
+  angle=end;
+ });
+ // Central hole and contextual information for the selected slice.
+ ctx.beginPath();ctx.arc(cx,cy,inner,0,Math.PI*2);ctx.fillStyle='#1a1e25';ctx.fill();
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#9aa3b2';
+ const chosen=parts.find(p=>p.id===selectedChargeId);
+ if(chosen){
+  const pct=Math.round(chosen.value/total*100);
+  const label=fitCanvasText(ctx,chosen.name,size*.43,size*.047,7.5);
+  ctx.font=label.font;ctx.fillStyle='#b8c3d2';ctx.fillText(label.text,cx,cy-size*.078);
+  const amount=fitCanvasText(ctx,euro(chosen.value),size*.43,size*.075,8);
+  ctx.font=amount.font;ctx.fillStyle='#f1f3f6';ctx.fillText(amount.text,cx,cy+size*.012);
+  ctx.font='700 '+Math.max(7,Math.round(size*.042))+'px system-ui';ctx.fillStyle=chosen.color;ctx.fillText(pct+' % du total',cx,cy+size*.092);
+  canvas.setAttribute('aria-label',chosen.name+', '+euro(chosen.value)+', '+pct+' pour cent du total. Utilise les flèches pour changer de charge.');
+ }else{
+  ctx.font='700 '+Math.max(8,Math.round(size*.045))+'px system-ui';ctx.fillStyle='#9aa3b2';ctx.fillText('TOTAL MENSUEL',cx,cy-size*.075);
+  const amount=fitCanvasText(ctx,euro(total),size*.43,size*.083,8);
+  ctx.font=amount.font;ctx.fillStyle='#f1f3f6';ctx.fillText(amount.text,cx,cy+size*.012);
+  ctx.font='700 '+Math.max(7,Math.round(size*.038))+'px system-ui';ctx.fillStyle='#9aa3b2';ctx.fillText('Clique sur une part',cx,cy+size*.092);
+  canvas.setAttribute('aria-label','Total des charges fixes : '+euro(total)+'. Clique sur une part du camembert pour voir le détail.');
+ }
+}
+function selectChartSliceAt(event){
+ if(!chartHits.length)return;
+ const canvas=$('expenseChart'),rect=canvas.getBoundingClientRect();
+ const x=(event.clientX-rect.left)/rect.width*canvas.width-canvas.width/2;
+ const y=(event.clientY-rect.top)/rect.height*canvas.height-canvas.height/2;
+ const r=Math.hypot(x,y),outer=canvas.width*.43,inner=canvas.width*.255;
+ if(r<inner||r>outer)return;
+ let angle=Math.atan2(y,x)+Math.PI/2;angle=(angle+Math.PI*2)%(Math.PI*2);
+ const hit=chartHits.find(h=>angle>=h.from&&angle<h.to);
+ if(hit){selectedChargeId=hit.id;drawChart()}
+}
+$('expenseChart').addEventListener('click',selectChartSliceAt);
+$('expenseChart').addEventListener('keydown',e=>{
+ if(!['ArrowRight','ArrowLeft','Enter',' '].includes(e.key)||!chartHits.length)return;
+ e.preventDefault();
+ let index=chartHits.findIndex(h=>h.id===selectedChargeId);
+ if(e.key==='ArrowRight')index=(index+1)%chartHits.length;
+ else if(e.key==='ArrowLeft')index=index<0?chartHits.length-1:(index-1+chartHits.length)%chartHits.length;
+ else index=index<0?0:(index+1)%chartHits.length;
+ selectedChargeId=chartHits[index].id;drawChart();
+});
+window.addEventListener('resize',()=>drawChart());
 function render(){const total=store.fixed.reduce((s,x)=>s+(Number(x.amount)||0),0);const count=store.fixed.length;const highest=store.fixed.reduce((m,x)=>Math.max(m,Number(x.amount)||0),0);$('fixedGrandTotal').textContent=euro(total);$('fixedCountStat').textContent=String(count);$('highestCharge').textContent=euro(highest);$('fixedCount').textContent=count+' charge'+(count>1?'s':'');renderList();drawChart()}
 $('addFixed').onclick=()=>{const name=$('fixedName').value.trim(),amount=Number($('fixedAmount').value);if(!name||!Number.isFinite(amount)||amount<=0)return alert('Indique un nom et un montant valide.');store.fixed.push({id:Date.now()+Math.random(),name,amount,category:$('fixedCategory').value});$('fixedName').value='';$('fixedAmount').value='';save();render()};
 document.addEventListener('click',e=>{const del=e.target.closest('[data-delete]');if(del){const id=del.dataset.delete;if(!confirm('Supprimer cette charge fixe ?'))return;store.fixed=store.fixed.filter(x=>String(x.id)!==String(id));save();render();return}const edit=e.target.closest('[data-edit]');if(edit){const x=store.fixed.find(x=>String(x.id)===String(edit.dataset.edit));if(!x)return;const n=prompt('Nom de la charge',x.name);if(n===null)return;const a=prompt('Montant mensuel en euros',x.amount);if(a===null)return;const amount=Number(a.replace(',','.'));if(!n.trim()||!Number.isFinite(amount)||amount<=0)return alert('Valeurs invalides.');x.name=n.trim();x.amount=amount;save();render()}});
